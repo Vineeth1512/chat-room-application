@@ -107,14 +107,11 @@
     </form>
   </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
-  <script src="/_next/static/runtime/remoteEntry.js"></script>
 
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    //const socket = io();
-    const socket = io({ transports: ["websocket"], upgrade: false });
-
+    const socket = io();
 
     socket.on('message', (msg) => {
       $('#messages').append($('<li>').html(msg.text));
