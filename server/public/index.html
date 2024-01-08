@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatroom</title>
+  <style>
+    .online { color: green; }
+    .disconnected { color: red; }
+    body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f2f2f2;
+}
+
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#messages,
+#userList {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  max-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+#messages li,
+#userList li {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  width: 70%; /* Adjust as needed */
+}
+
+#messages li {
+  background-color: #e0e0e0;
+  align-self: flex-start; /* Messages on the left */
+}
+
+#messages li.self {
+  background-color: #3498db;
+  color: #fff;
+  align-self: flex-end; /* Messages on the right */
+}
+
+.online {
+  color: green;
+}
+
+.disconnected {
+  color: red;
+}
+
+#form {
+  display: flex;
+  margin: 10px;
+}
+
+#m {
+  flex-grow: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+button {
+  padding: 10px;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+  </style>
+</head>
+<body>
+    
+    <div class="container">
+        <h1 style="text-align: center;">Chat Room</h1>
+  <ul id="messages"></ul>
+  <ul id="userList"></ul>
+  <form id="form" onsubmit="sendMessage(); return false;">
+    <input id="m" autocomplete="off" /><button>Send</button>
+  </form>
+</div>
+
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    socket.on('message', (msg) => {
+      $('#messages').append($('<li>').html(msg.text));
+    });
+
+    socket.on('userList', (users) => {
+      $('#userList').empty();
+      users.forEach((user) => {
+        const className = user.color === "\x1b[32m" ? "online" : "disconnected";
+        $('#userList').append($('<li>').html(`<span class="${className}">${user.username}</span>`));
+      });
+    });
+
+    socket.on('errorMessage', (message) => {
+      alert(message);
+      window.location.reload();
+    });
+
+    function sendMessage() {
+      const message = $('#m').val();
+      socket.emit('chatMessage', message);
+      $('#m').val('');
+      return false;
+    }
+
+    const username = prompt('Enter your username:');
+    const key = prompt('Enter the special key (e.g., 1234):');
+
+    socket.emit('join', { username, key });
+  </script>
+</body>
+</html>
